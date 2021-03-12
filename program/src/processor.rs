@@ -922,7 +922,7 @@ impl Processor {
 
         if (openorders_free_pc == 0) & (openorders_free_coin == 0) {
             msg!("No funds to settle.");
-            return Err(BonfidaBotError::Overflow.into());
+            return Err(BonfidaBotError::LockedOperation.into());
         }
 
         &pool_coin_asset.pack_into_slice(get_asset_slice(
