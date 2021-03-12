@@ -1087,6 +1087,12 @@ impl Processor {
         }
 
         let total_pooltokens = Mint::unpack(&mint_account.data.borrow())?.supply;
+        let total_user_pooltokens = Account::unpack(&source_pool_token_account.data.borrow())?.amount;
+
+        if total_user_pooltokens < pool_token_amount {
+            msg!("Insufficient pool token funds");
+            return Err(ProgramError::InsufficientFunds)
+        } 
 
         // Execute buy out
         for i in 0..nb_assets {
@@ -1146,15 +1152,7 @@ impl Processor {
                 mint_account.clone(),
                 source_pool_token_owner_account.clone(),
             ],
-        ).map_err(|e| {
-            match e {
-                ProgramError::Custom(1) => {
-                    msg!("Insufficient pool token funds");
-                    return ProgramError::InsufficientFunds;
-                }
-                _ => return e
-            }
-        })?;
+        )?;
 
         if pool_token_amount == total_pooltokens {
             // Reset the pool data, keeping the pool header mostly intact to preserve pool seeds
