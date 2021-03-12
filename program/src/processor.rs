@@ -1136,7 +1136,15 @@ impl Processor {
             &source_pool_token_owner_account.key,
             &[],
             pool_token_amount,
-        )?;
+        ).map_err(|e| {
+            match e {
+                ProgramError::Custom(1) => {
+                    msg!("Insufficient pool token funds");
+                    return ProgramError::InsufficientFunds;
+                }
+                _ => return e
+            }
+        })?;
 
         invoke(
             &instruction,
